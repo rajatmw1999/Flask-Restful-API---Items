@@ -13,7 +13,7 @@ class User:
         cursor = connection.cursor()
 
         query = "SELECT * FROM users WHERE username=?"
-        cursor.execute(query, (username,))
+        result = cursor.execute(query, (username,))
         row = result.fetchone()
         if row:
             user = cls(*row)
@@ -24,12 +24,12 @@ class User:
         return user
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, id):
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
         query = "SELECT * FROM users WHERE id=?"
-        cursor.execute(query, (id,))
+        result = cursor.execute(query, (id,))
         row = result.fetchone()
         if row:
             user = cls(*row)
@@ -54,6 +54,10 @@ class UserRegister(Resource):
 
     def post(self):
         data = UserRegister.parser.parse_args()
+        
+        if User.find_by_username(data['username']):
+            return {"message":"A user with this username already exists"}, 400
+
         connection = sqlite3.connect('data.db')
         cursor = connection.cursor()
 
